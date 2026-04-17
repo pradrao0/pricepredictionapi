@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.cache import cache
 
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 
 from .models import HousePricePrediction
 from .serializers import HousePriceSerializer
@@ -44,7 +44,7 @@ def get_locations():
 class HousePriceViewSet(ModelViewSet):
     queryset = HousePricePrediction.objects.all()
     serializer_class = HousePriceSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
         # 1️⃣ Save request data
