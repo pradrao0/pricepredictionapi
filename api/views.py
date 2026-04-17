@@ -13,8 +13,8 @@ from .serializers import HousePriceSerializer
 
 
 # 📁 Paths (inside backend/)
-MODEL_PATH = os.path.join(settings.BASE_DIR, "house_price_model.pkl")
-LOCATIONS_PATH = os.path.join(settings.BASE_DIR, "locations.pkl")
+MODEL_PATH = os.path.join(settings.BASE_DIR,"api", "house_price_model.pkl")
+LOCATIONS_PATH = os.path.join(settings.BASE_DIR,"api", "locations.pkl")
 
 
 # 🔁 Caching functions
