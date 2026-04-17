@@ -12,21 +12,15 @@ from .models import HousePricePrediction
 from .serializers import HousePriceSerializer
 
 
-# 📁 Paths (inside backend/)
-MODEL_PATH = os.path.join(settings.BASE_DIR,"api", "house_price_model.pkl")
-LOCATIONS_PATH = os.path.join(settings.BASE_DIR,"api", "locations.pkl")
-
-
-# 🔁 Caching functions
-
 def get_model():
-    model = cache.get("ml_model")
+    model_path = os.path.join(settings.BASE_DIR, 'api', 'house_price_model.pkl')
+    print("MODEL PATH:", model_path)   
+    return joblib.load(model_path)
 
-    if model is None:
-        model = joblib.load(MODEL_PATH)
-        cache.set("ml_model", model, timeout=None)
-
-    return model
+def get_locations():
+    location_path = os.path.join(settings.BASE_DIR, 'api', 'locations.pkl')
+    print("LOCATION PATH:", location_path)   
+    return joblib.load(location_path)
 
 
 def get_locations():
@@ -39,7 +33,7 @@ def get_locations():
     return locations
 
 
-# 🚀 ViewSet
+#  ViewSet
 
 class HousePriceViewSet(ModelViewSet):
     queryset = HousePricePrediction.objects.all()
@@ -47,14 +41,14 @@ class HousePriceViewSet(ModelViewSet):
     permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
-        # 1️⃣ Save request data
+        # Save request data
         instance = serializer.save()
 
-        # 2️⃣ Get cached model & locations
+        #  Get cached model & locations
         model = get_model()
         locations = get_locations()
 
-        # 3️⃣ Prepare ML input
+        #  Prepare ML input
         data = {
             "total_sqft": instance.total_sqft,
             "bath": instance.bath,
@@ -66,9 +60,9 @@ class HousePriceViewSet(ModelViewSet):
 
         X = pd.DataFrame([data])
 
-        # 4️⃣ Predict
+        # Predict
         predicted_price = model.predict(X)[0]
 
-        # 5️⃣ Save prediction
+        # Save prediction
         instance.predicted_price = predicted_price
         instance.save()
