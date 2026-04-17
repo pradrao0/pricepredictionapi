@@ -5,7 +5,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# ⚠️ SECURITY (use env in production later)
+#  SECURITY (use env in production later)
 SECRET_KEY = 'django-insecure-4&2r2lugkcg5iigtx*m#$z#9+#m2ia1rd2ldbxpxd+=c^_qmq9'
 
 DEBUG = True
@@ -13,7 +13,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 
-# 📦 INSTALLED APPS
+#  INSTALLED APPS
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,7 +37,7 @@ INSTALLED_APPS = [
 ]
 
 
-# ⚙️ MIDDLEWARE
+#  MIDDLEWARE
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -46,13 +46,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 
 ROOT_URLCONF = 'backend.urls'
 
 
-# 🧱 TEMPLATES
+#  TEMPLATES
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -82,7 +84,7 @@ DATABASES = {
 }
 
 
-# 🔐 PASSWORD VALIDATION
+#  PASSWORD VALIDATION
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -98,15 +100,15 @@ USE_I18N = True
 USE_TZ = True
 
 
-# 📁 STATIC FILES
+# STATIC FILES
 STATIC_URL = 'static/'
 
 
-# 🔑 DEFAULT PRIMARY KEY
+#  DEFAULT PRIMARY KEY
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# ⚡ DRF CONFIG
+#  DRF CONFIG
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -117,7 +119,7 @@ REST_FRAMEWORK = {
 }
 
 
-# 🔐 SIMPLE JWT CONFIG
+# SIMPLE JWT CONFIG
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
