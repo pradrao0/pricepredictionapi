@@ -6,49 +6,69 @@ from django.conf import settings
 from django.core.cache import cache
 
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 from .models import HousePricePrediction
 from .serializers import HousePriceSerializer
 
 
+# -------------------------
+# CACHED MODEL
+# -------------------------
 def get_model():
-    model_path = os.path.join(settings.BASE_DIR, 'api', 'house_price_model.pkl')
-    print("MODEL PATH:", model_path)   
-    return joblib.load(model_path)
+    model = cache.get("model")
 
-def get_locations():
-    location_path = os.path.join(settings.BASE_DIR, 'api', 'locations.pkl')
-    print("LOCATION PATH:", location_path)   
-    return joblib.load(location_path)
+    if model is None:
+        model_path = os.path.join(settings.BASE_DIR, 'api', 'house_price_model.pkl')
+        model = joblib.load(model_path)
+        cache.set("model", model, timeout=None)
+
+    return model
 
 
+# -------------------------
+# CACHED LOCATIONS
+# -------------------------
 def get_locations():
     locations = cache.get("locations")
 
     if locations is None:
-        locations = joblib.load(LOCATIONS_PATH)
+        location_path = os.path.join(settings.BASE_DIR, 'api', 'locations.pkl')
+        locations = joblib.load(location_path)
         cache.set("locations", locations, timeout=None)
 
     return locations
 
 
-#  ViewSet
-
+# -------------------------
+# VIEWSET
+# -------------------------
 class HousePriceViewSet(ModelViewSet):
-    queryset = HousePricePrediction.objects.all()
     serializer_class = HousePriceSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
+    # 🔥 REQUIRED FOR FILTERING TO WORK
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+
+    # FILTER / SEARCH / ORDER
+    filterset_fields = ["location", "bhk", "bath"]
+    search_fields = ["location"]
+    ordering_fields = ["created_at", "predicted_price"]
+    ordering = ["-created_at"]  # default ordering
+
+    # USER-SPECIFIC DATA
+    def get_queryset(self):
+        return HousePricePrediction.objects.filter(user=self.request.user)
+
+    # CREATE + PREDICT
     def perform_create(self, serializer):
-        # Save request data
-        instance = serializer.save()
+        instance = serializer.save(user=self.request.user)
 
-        #  Get cached model & locations
         model = get_model()
         locations = get_locations()
 
-        #  Prepare ML input
         data = {
             "total_sqft": instance.total_sqft,
             "bath": instance.bath,
@@ -60,9 +80,10 @@ class HousePriceViewSet(ModelViewSet):
 
         X = pd.DataFrame([data])
 
-        # Predict
-        predicted_price = model.predict(X)[0]
+        try:
+            predicted_price = model.predict(X)[0]
+        except Exception:
+            predicted_price = None
 
-        # Save prediction
         instance.predicted_price = predicted_price
         instance.save()
