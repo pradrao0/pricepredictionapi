@@ -17,48 +17,28 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
-
 urlpatterns = [
 
-    path(
-        "admin/",
-        admin.site.urls
-    ),
+    path("admin/", admin.site.urls),
 
     # ML API
-    path(
-        "api/",
-        include("api.urls")
-    ),
+    path("api/", include("api.urls")),
 
-    # authentication
-    path(
-        "auth/",
-        include("djoser.urls")
-    ),
+    # authentication (Djoser + JWT)
+    path("auth/", include("djoser.urls")),
+    path("auth/", include("djoser.urls.jwt")),
 
-    path(
-        "auth/",
-        include("djoser.urls.jwt")
-    ),
-
-    # swagger docs
+    # Swagger documentation
     path(
         "swagger/",
-        schema_view.with_ui(
-            "swagger",
-            cache_timeout=0
-        ),
+        schema_view.with_ui("swagger", cache_timeout=0),
         name="swagger"
     ),
 
-    # redoc docs
+    # ReDoc documentation
     path(
         "redoc/",
-        schema_view.with_ui(
-            "redoc",
-            cache_timeout=0
-        ),
+        schema_view.with_ui("redoc", cache_timeout=0),
         name="redoc"
     ),
 ]
